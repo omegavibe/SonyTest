@@ -1,0 +1,16 @@
+﻿ ul {
+    list-style-type: none;
+}
+ul.indexes li {
+    display : inline;
+}
+ul{
+    padding : 0;
+}
+#locales-selector{
+    width : 80px;
+}
+#dialog-inner{
+    background-color : white;
+    border : 1px;
+}

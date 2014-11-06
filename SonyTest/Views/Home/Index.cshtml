@@ -1,0 +1,181 @@
+﻿@{
+    ViewBag.Title = "Add Order Page";
+}
+<form id="order">
+    <ul>
+        <li>
+            *Customer :
+            <select id="customers" name="customers">
+                <option value=1>Sony Pictures Entertainment</option>
+                <option value=2>BBCW</option>
+                <option value=3>Warner Bros.</option>
+                <option value=4>Paramount Pictures</option>
+                <option value=5>Village Roadshow</option>
+            </select>
+        </li>
+        <li>
+            *Distributor :
+            <select id="distributors" name="distributors">
+                <option value=1>Netflix</option>
+                <option value=2>Hulu</option>
+                <option value=3>AB Svensk</option>
+                <option value=4>Amazon</option>
+                <option value=5>TV Azteca</option>
+            </select>
+        </li>
+        <li>
+            *Customer PO:
+            <input id="customerpo" type="text" name="customerpo" size="50">
+        </li>
+        <li>
+            *PO Value:
+            <input id="povalue" type="text" name="customerpo" size="50">
+        </li>
+        <li>
+            Due Date:
+            <input id="duedate" type="text" name="duedate" size="50">
+        </li>
+        <li>
+            Priority :
+            <select id="distributors" name="distributors">
+                <option value=4>Urgent</option>
+                <option value=3>High</option>
+                <option value=2>Normal</option>
+                <option value=1>Low</option>
+            </select>
+        </li>
+        <li>
+            Locales : <button id="btn-add-locale" type="button">Add</button><div id="locale-list">en-gb</div>
+        </li>
+        <li>
+            Description : <textarea id="description" rows="4" cols="50"></textarea>
+        </li>
+    </ul>
+    <button id="submit" type="button">Submit</button>
+</form>
+
+<div id="add-locale-dialog">
+    <div id="dialog-inner">
+        <ul>
+            <li>
+            <li>
+                Territory :
+                <select id="territories" name="territories">
+                    <option value="United States">United States (US)</option>
+                    <option value="France">France</option>
+                    <option value="Spain">Spain</option>
+                    <option value="Sweden">Sweden</option>
+                </select>
+            </li>
+            <li>
+                Language :
+                <select id="lanugages" name="languages">
+                    <option value="en">English (en)</option>
+                    <option value="fr">French</option>
+                    <option value="es">Spanish</option>
+                    <option value="sv">Swedish</option>
+                </select>
+            </li>
+            <li>
+                Locales :
+                <select multiple id="locales-selector">
+                    <option value="en-US">en-US</option>
+                    <option value="fr-FR">fr-FR</option>
+                    <option value="fr-CA">fr-CA</option>
+                    <option value="es-MX">es-MX</option>
+                    <option value="en-CA">en-CA</option>
+                    <option value="sv-SE">sv-SE</option>
+                </select>
+                <button id="btn-locale-set-primary" type="button">Make Primary</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-2.1.1.js"></script>
+<script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    var localesArray = new Array();
+    var primaryLocale = "";
+
+    $("#btn-locale-set-primary").click(function () {
+        var localesSelected = $("#locales-selector").val();
+        
+        if (localesSelected.length > 0) {
+            primaryLocale = localesSelected[0];
+        }
+
+    });
+
+    function addLocale() {
+        var localesSelected = $("#locales-selector").val();
+        
+        //iterate localesSelected and for each
+        //create locales object and push to array
+
+        for (var n = 0; n < localesSelected.length - 1 ; n++)
+        {
+            var newLocale = {
+                LocaleValue : localesSelected[n],
+                Territory: $("#territories").val(),
+                Language: $("#lanugages").val()
+            };
+
+            if (primaryLocale === localesSelected[n]) {
+                newLocale.IsPrimary = true;
+            }
+            else {
+                newLocale.IsPrimary = false;
+            }
+
+            localesArray.push(newLocale);
+        }
+
+
+        dialog.dialog("close");
+    };
+
+    dialog = $("#add-locale-dialog").dialog({
+        autoOpen: false,
+        height: 300,
+        width: 350,
+        modal: true,
+        buttons: {
+            "save": addLocale,
+            Cancel: function () {
+                dialog.dialog("close");
+            }
+        },
+        close: function () {
+            //todo reset form
+        }
+    });
+
+    $("#btn-add-locale").button().on("click", function () {
+        dialog.dialog("open");
+    });
+
+    //Submit Form
+    $("#submit").click(function () {
+        $.ajax({
+            type: 'POST',
+            url: '/Home/SaveOrder',
+            data: JSON.stringify({
+                    CustomerId : $("#customers").val(),
+                    DistributorId: $("#distributors").val(),
+                    CustomerPO: $("#customerpo").val(),
+                    POValue: $("#povalue").val(),
+                    DueDate: $("#duedate").val(),
+                    Description: $("#description").val(),
+                    Locales: localesArray
+                }),
+            dataType: 'json',
+            accept: 'application/json',
+            contentType: 'application/json',
+        }).done(function (data, status) {
+            alert("Submitted");
+        });
+    });
+
+</script>
